@@ -110,15 +110,3 @@ class ThreadPool:
             print('worker_state error: %s' % error)
         finally:
             state_list.remove(worker_thread)
-
-    def get_free_num(self):
-        """
-        :return:    空闲线程数量
-        """
-        return len(self.free_list)
-
-    def get_generate_num(self):
-        """
-        :return:    获取实例化线程数
-        """
-        return len(self.generate_list)
