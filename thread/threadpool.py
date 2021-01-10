@@ -87,6 +87,17 @@ class ThreadPool:
         else:
             self.generate_list.remove(current_thread)
 
+    # 上下文管理,放入
+    @contextlib.contextmanager
+    def __worker_state(self, state_list, worker_thread):
+        state_list.append(worker_thread)
+        try:
+            yield
+        except Exception as error:
+            print('worker_state error: %s' % error)
+        finally:
+            state_list.remove(worker_thread)
+
     def close(self):
         """
         不在添加任务, 执行完成即退出
@@ -104,14 +115,3 @@ class ThreadPool:
         # 计算已创建的线程个数, 然后往任务队列里推送数量相同的标识元素
         while self.generate_list:
             self.queue.put(None)
-
-    # 上下文管理,放入
-    @contextlib.contextmanager
-    def __worker_state(self, state_list, worker_thread):
-        state_list.append(worker_thread)
-        try:
-            yield
-        except Exception as error:
-            print('worker_state error: %s' % error)
-        finally:
-            state_list.remove(worker_thread)
