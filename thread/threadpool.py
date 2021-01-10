@@ -6,22 +6,27 @@ import threading
 class ThreadPool:
     def __init__(self, thread_max_num, max_task_num=0):
         """
-        :param thread_max_num:  最大线程数
-        :param max_task_num:    最大队列数
+        :param  thread_max_num:         最大线程数
+        :param  max_task_num:           最大队列数
+        :var    self.queue:             任务队列
+        :var    self.thread_max_num:    线程最大数
+        :var    self.free_list:         空闲线程
+        :var    self.generate_list:     已实例化的线程
+        :return:
         """
         # max_num      线程池最大线程数量
         # max_task_num 任务队列长度
         self.queue = queue.Queue(max_task_num)
         # 设置线程池最多可实例化的线程数
         self.thread_max_num = thread_max_num
-        # 任务取消标识
-        self.cancel = False
-        # 任务中断标识
-        self.interrupt = False
         # 已实例化的线程列表
         self.generate_list = []
         # 处于空闲状态的线程列表
         self.free_list = []
+        # 任务取消标识
+        self.__cancel = False
+        # 任务中断标识
+        self.__interrupt = False
 
     def put(self, func, kwargs=None, callback=None):   # 往任务队列加入一个任务
         """
@@ -31,7 +36,7 @@ class ThreadPool:
         :return:
         """
         # 判断任务是否已经取消
-        if self.cancel:
+        if self.__cancel:
             return
         # 如果没有空闲的线程, 并且已经创建的线程数量小于预设的线程数量, 则创建新线程
         if len(self.free_list) == 0 and len(self.generate_list) < self.thread_max_num:
@@ -72,7 +77,7 @@ class ThreadPool:
                 except Exception as error:
                     print(str('执行回调函数出错 %s' % error))
             with self.__worker_state(self.free_list, current_thread):
-                if self.interrupt:
+                if self.__interrupt:
                     # event等于None 跳出循环
                     event = None
                 # 否则获取一个正常的任务, 并回调worker_state方法的yield语句
@@ -86,7 +91,7 @@ class ThreadPool:
         """
         不在添加任务, 执行完成即退出
         """
-        self.cancel = True
+        self.__cancel = True
         # 计算已创建的线程个数, 然后往任务队列里推送数量相同的标识元素
         while self.generate_list:
             self.queue.put(None)
@@ -95,7 +100,7 @@ class ThreadPool:
         """
         强制退出
         """
-        self.interrupt = True
+        self.__interrupt = True
         # 计算已创建的线程个数, 然后往任务队列里推送数量相同的标识元素
         while self.generate_list:
             self.queue.put(None)
