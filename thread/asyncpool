@@ -10,6 +10,7 @@ class AsyncPool:
         self.semaphore = asyncio.Semaphore(maxsize, loop=self.loop)
         self.loop_thread = Thread(target=self.__start_thread_loop)
         self.loop_thread.start()
+        self.__cancel = False
 
     def task_add(self):
         self.tasks.put_nowait(None)
@@ -25,11 +26,16 @@ class AsyncPool:
         return self.tasks.qsize()
 
     def submit(self, func, callback=None):
+        if self.__cancel:
+            return
         self.task_add()
         future = asyncio.run_coroutine_threadsafe(self.async_semaphore_func(func), loop=self.loop)
         future.add_done_callback(callback)
         future.add_done_callback(self.task_done)
 
+    def stop_task(self):
+        self.loop.close()
+        
     # 任务阻塞
     async def async_semaphore_func(self, func):
         async with self.semaphore:
