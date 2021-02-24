@@ -14,8 +14,6 @@ class ThreadPool:
         :var    self.generate_list:     已实例化的线程
         :return:
         """
-        # max_num      线程池最大线程数量
-        # max_task_num 任务队列长度
         self.queue = queue.Queue(max_task_num)
         # 设置线程池最多可实例化的线程数
         self.thread_max_num = thread_max_num
@@ -90,8 +88,8 @@ class ThreadPool:
     # 上下文管理,放入
     @contextlib.contextmanager
     def __worker_state(self, state_list, worker_thread):
-        state_list.append(worker_thread)
         try:
+            state_list.append(worker_thread)
             yield
         except Exception as error:
             print('worker_state error: %s' % error)
