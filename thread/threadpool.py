@@ -51,6 +51,7 @@ class ThreadPool:
         self.generate_list.append(current_thread)
         # 从任务队列中获取一个任务
         event = self.queue.get()
+
         # 获取的任务不是终止线程标识对象时
         while event is not None:
             # 解析任务重封装的三个参数
@@ -74,6 +75,7 @@ class ThreadPool:
                     callback(success, result)
                 except Exception as error:
                     print(str('执行回调函数出错 %s' % error))
+            self.queue.task_done()
             with self.__worker_state(self.free_list, current_thread):
                 if self.__interrupt:
                     # event等于None 跳出循环
