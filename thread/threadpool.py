@@ -103,7 +103,7 @@ class ThreadPool:
         不在添加任务, 执行完成即退出
         """
         self.__cancel = True
-        # 计算已创建的线程个数, 然后往任务队列里推送数量相同的标识元素
+        # 获取已创建的线程个数, 往任务队列里推送数量相同的标识元素
         while self.generate_list:
             self.queue.put(None)
 
@@ -112,6 +112,6 @@ class ThreadPool:
         强制退出
         """
         self.__interrupt = True
-        # 计算已创建的线程个数, 然后往任务队列里推送数量相同的标识元素
+        # 获取已创建的线程个数, 往任务队列里推送数量相同的标识元素
         while self.generate_list:
             self.queue.put(None)
