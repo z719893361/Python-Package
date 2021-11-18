@@ -41,3 +41,4 @@ class BloomFilter:
             if self.redis.getbit(self.key, offset) == 0:
                 return False
         return True
+    
