@@ -71,3 +71,4 @@ class BloomDupeFilter(BaseDupeFilter):
             return True
         else:
             self.filter.insert(request.url)
+            
