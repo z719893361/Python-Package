@@ -1,5 +1,3 @@
-from scrapy.dupefilters import BaseDupeFilter
-from scrapy.http import Request
 from redis import Redis
 import math
 
@@ -43,32 +41,3 @@ class BloomFilter:
             if self.redis.getbit(self.key, offset) == 0:
                 return False
         return True
-
-
-class BloomDupeFilter(BaseDupeFilter):
-    @classmethod
-    def from_settings(cls, settings):
-        spider = cls(
-            settings.get('REDIS_HOST'),
-            settings.get('REDIS_PORT')
-        )
-        return spider
-
-    def close(self, reason):
-        self.redis.close()
-
-    def __init__(self, host, port):
-        self.redis = Redis(host=host, port=port)
-        self.filter = BloomFilter(
-            redis_conn=self.redis,
-            key='filter',
-            size=100000000,
-            error_rate=0.00001
-        )
-
-    def request_seen(self, request: Request):
-        if self.filter.exist(request.url):
-            return True
-        else:
-            self.filter.insert(request.url)
-            
