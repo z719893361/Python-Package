@@ -115,3 +115,4 @@ class ThreadPool:
         # 获取已创建的线程个数, 往任务队列里推送数量相同的标识元素
         while self.generate_list:
             self.queue.put(None)
+            
